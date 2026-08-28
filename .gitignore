@@ -3,16 +3,30 @@ backend/.venv/
 backend/__pycache__/
 backend/**/__pycache__/
 backend/*.pyc
-backend/.env
-backend/firebase-service-account.json
 backend/staticfiles/
+backend/db.sqlite3
+backend/.pytest_cache/
 
 # Node / Next.js
 frontend/node_modules/
 frontend/.next/
 frontend/out/
-frontend/.env.local
 frontend/npm-debug.log*
+
+# Secrets / credentials (any location, any variant)
+.env
+.env.*
+!.env.example
+!*/.env.example
+!*/.env.local.example
+*firebase-service-account*.json
+*serviceAccountKey*.json
+*.pem
+*.key
+*.p12
+*.pfx
+*credentials*.json
+*secret*.json
 
 # Editors / OS
 .idea/
