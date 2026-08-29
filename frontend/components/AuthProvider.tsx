@@ -10,8 +10,8 @@ type Profile = {
   username: string;
   email: string;
   created_at: string;
-  max_google_accounts: number;
-  connected_google_accounts: number;
+  max_connected_accounts: number;
+  connected_accounts: number;
 };
 
 type AuthContextValue = {

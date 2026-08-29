@@ -6,6 +6,7 @@ backend/*.pyc
 backend/staticfiles/
 backend/db.sqlite3
 backend/.pytest_cache/
+backend/tmp_uploads/
 
 # Node / Next.js
 frontend/node_modules/

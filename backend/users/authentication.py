@@ -43,4 +43,4 @@ class FirebaseAuthentication(authentication.BaseAuthentication):
                 "No driveON account linked to this Firebase user. Call /api/auth/sync first."
             ) from exc
 
-        return (user, None)
+        return (user, decoded)

@@ -4,8 +4,8 @@ from .models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
-    max_google_accounts = serializers.SerializerMethodField()
-    connected_google_accounts = serializers.SerializerMethodField()
+    max_connected_accounts = serializers.SerializerMethodField()
+    connected_accounts = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -14,13 +14,13 @@ class UserSerializer(serializers.ModelSerializer):
             "username",
             "email",
             "created_at",
-            "max_google_accounts",
-            "connected_google_accounts",
+            "max_connected_accounts",
+            "connected_accounts",
         ]
         read_only_fields = fields
 
-    def get_max_google_accounts(self, obj):
-        return obj.max_google_accounts()
+    def get_max_connected_accounts(self, obj):
+        return obj.max_connected_accounts()
 
-    def get_connected_google_accounts(self, obj):
-        return obj.google_accounts.filter(status="connected").count()
+    def get_connected_accounts(self, obj):
+        return obj.storage_accounts.filter(status="connected").count()

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { RebalanceBanner } from "@/components/RebalanceBanner";
 import { StorageBar } from "@/components/StorageBar";
 import { useAuth } from "@/components/AuthProvider";
 import { api } from "@/lib/api";
@@ -16,13 +17,19 @@ function DashboardContent() {
   const { profile } = useAuth();
   const [summary, setSummary] = useState<StorageSummary | null>(null);
   const [files, setFiles] = useState<DriveFile[]>([]);
+  const [largestFiles, setLargestFiles] = useState<DriveFile[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
-      const [summaryData, filesData] = await Promise.all([api.storageSummary(), api.listFiles()]);
+      const [summaryData, filesData, largestData] = await Promise.all([
+        api.storageSummary(),
+        api.listFiles(),
+        api.listFiles({ ordering: "-size" }),
+      ]);
       setSummary(summaryData);
       setFiles(filesData.slice(0, 5));
+      setLargestFiles(largestData.slice(0, 5));
       setLoading(false);
     })();
   }, []);
@@ -49,7 +56,7 @@ function DashboardContent() {
             <div className="rounded-lg border border-slate-200 bg-white p-6">
               <h2 className="text-sm font-medium text-slate-500">Connected Drives</h2>
               <p className="mt-1 text-2xl font-semibold">
-                {profile?.connected_google_accounts ?? 0} / {profile?.max_google_accounts ?? 5}
+                {profile?.connected_accounts ?? 0} / {profile?.max_connected_accounts ?? 5}
               </p>
               <Link href="/drives" className="mt-3 inline-block text-sm text-brand-600 hover:underline">
                 Manage drives &rarr;
@@ -57,6 +64,8 @@ function DashboardContent() {
             </div>
           </div>
         )}
+
+        <RebalanceBanner />
 
         <div className="mt-8 rounded-lg border border-slate-200 bg-white p-6">
           <div className="flex items-center justify-between">
@@ -75,6 +84,27 @@ function DashboardContent() {
           ) : (
             <ul className="mt-4 divide-y divide-slate-100">
               {files.map((f) => (
+                <li key={f.id} className="flex items-center justify-between py-2 text-sm">
+                  <span>{f.name}</span>
+                  <span className="text-slate-400">{formatBytes(f.size)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="mt-8 rounded-lg border border-slate-200 bg-white p-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-medium text-slate-500">Largest Files</h2>
+            <Link href="/analytics" className="text-sm text-brand-600 hover:underline">
+              View analytics &rarr;
+            </Link>
+          </div>
+          {largestFiles.length === 0 ? (
+            <p className="mt-4 text-sm text-slate-500">No files yet.</p>
+          ) : (
+            <ul className="mt-4 divide-y divide-slate-100">
+              {largestFiles.map((f) => (
                 <li key={f.id} className="flex items-center justify-between py-2 text-sm">
                   <span>{f.name}</span>
                   <span className="text-slate-400">{formatBytes(f.size)}</span>

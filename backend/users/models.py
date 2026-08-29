@@ -7,7 +7,9 @@ class Plan(models.Model):
     """Configurable subscription tier -- see driveON SOP section 69."""
 
     name = models.CharField(max_length=50, unique=True)
-    max_google_accounts = models.PositiveIntegerField(default=5)
+    # One combined cap across every connected provider (Google + OneDrive),
+    # matching "one unified storage pool" -- not a per-provider limit.
+    max_connected_accounts = models.PositiveIntegerField(default=5)
     max_file_size_mb = models.PositiveIntegerField(default=4096)
     ai_queries_per_month = models.PositiveIntegerField(default=50)
 
@@ -19,7 +21,7 @@ class Plan(models.Model):
         plan, _ = cls.objects.get_or_create(
             name="free",
             defaults={
-                "max_google_accounts": 5,
+                "max_connected_accounts": 5,
                 "max_file_size_mb": 4096,
                 "ai_queries_per_month": 50,
             },
@@ -41,10 +43,22 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, firebase_uid, username, email, **extra_fields):
+    def create_superuser(self, firebase_uid, username, email, password=None, **extra_fields):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
-        return self.create_user(firebase_uid, username, email, **extra_fields)
+        if not extra_fields.get("is_staff") or not extra_fields.get("is_superuser"):
+            raise ValueError("Superuser must have is_staff=True and is_superuser=True.")
+
+        email = self.normalize_email(email)
+        user = self.model(firebase_uid=firebase_uid, username=username, email=email, **extra_fields)
+        # Unlike create_user (Firebase owns application-user auth), an admin
+        # account needs a real Django password to log into /admin/.
+        if password:
+            user.set_password(password)
+        else:
+            user.set_unusable_password()
+        user.save(using=self._db)
+        return user
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -69,5 +83,5 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.username
 
-    def max_google_accounts(self):
-        return self.plan.max_google_accounts if self.plan else 5
+    def max_connected_accounts(self):
+        return self.plan.max_connected_accounts if self.plan else 5

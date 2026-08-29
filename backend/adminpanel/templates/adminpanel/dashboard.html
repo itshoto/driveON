@@ -1,0 +1,53 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<h1>driveON Admin Dashboard</h1>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-top:20px;">
+  <div style="border:1px solid #ccc;border-radius:8px;padding:16px;">
+    <div style="font-size:24px;font-weight:600;">{{ user_count }}</div>
+    <div>Users</div>
+  </div>
+  <div style="border:1px solid #ccc;border-radius:8px;padding:16px;">
+    <div style="font-size:24px;font-weight:600;">{{ file_count }}</div>
+    <div>Files</div>
+  </div>
+  <div style="border:1px solid #ccc;border-radius:8px;padding:16px;">
+    <div style="font-size:24px;font-weight:600;">{{ distributed_file_count }}</div>
+    <div>Distributed files (&gt;1 account)</div>
+  </div>
+  <div style="border:1px solid #ccc;border-radius:8px;padding:16px;">
+    <div style="font-size:24px;font-weight:600;">{{ active_uploads }}</div>
+    <div>Active uploads</div>
+  </div>
+  <div style="border:1px solid #ccc;border-radius:8px;padding:16px;">
+    <div style="font-size:24px;font-weight:600;{% if failed_uploads %}color:#b91c1c;{% endif %}">{{ failed_uploads }}</div>
+    <div>Failed uploads</div>
+  </div>
+  <div style="border:1px solid #ccc;border-radius:8px;padding:16px;">
+    <div style="font-size:24px;font-weight:600;{% if failed_rebalances %}color:#b91c1c;{% endif %}">{{ failed_rebalances }}</div>
+    <div>Failed rebalance runs</div>
+  </div>
+</div>
+
+<h2 style="margin-top:32px;">Connected accounts by provider</h2>
+<ul>
+  {% for row in accounts_by_provider %}
+    <li>{{ row.provider }}: {{ row.n }}</li>
+  {% empty %}
+    <li>No connected accounts yet.</li>
+  {% endfor %}
+</ul>
+
+<h2 style="margin-top:32px;">System Health</h2>
+<ul>
+  <li>Database: OK (this page loaded)</li>
+  <li>Redis: {% if redis_ok %}OK{% else %}<span style="color:#b91c1c;">unreachable</span>{% endif %}</li>
+  <li>
+    Celery workers responding: {{ celery_workers }}
+    {% if not celery_workers %}
+      <span style="color:#b91c1c;">(none -- background jobs like uploads/rebalancing/AI features won't process)</span>
+    {% endif %}
+  </li>
+</ul>
+{% endblock %}

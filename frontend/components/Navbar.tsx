@@ -4,12 +4,15 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { NotificationBell } from "./NotificationBell";
 import { useAuth } from "./AuthProvider";
 
 const LINKS = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/drives", label: "My Drives" },
   { href: "/files", label: "My Files" },
+  { href: "/shared-with-me", label: "Shared with Me" },
+  { href: "/settings", label: "Settings" },
 ];
 
 export function Navbar() {
@@ -40,6 +43,7 @@ export function Navbar() {
               {link.label}
             </Link>
           ))}
+          <NotificationBell />
           {profile && <span className="text-sm text-slate-500">{profile.username}</span>}
           <button
             onClick={handleSignOut}
